@@ -5,3 +5,5 @@ I was doing framework puzzles, one day, and spotted one of the expert puzzles. I
 I decided to write a utility program to solve framework puzzles.
 
 Feel free to improve the code, if you feel the desire.
+
+An expert puzzle is included with extension PUZ.
