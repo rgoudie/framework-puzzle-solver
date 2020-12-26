@@ -152,7 +152,7 @@
             this.label_01_01.TabIndex = 0;
             this.label_01_01.Text = "Z";
             this.label_01_01.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.label_01_01.MouseClick += new System.Windows.Forms.MouseEventHandler(this.label_MouseClick);
+            this.label_01_01.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Label_MouseClick);
             // 
             // labelPuzzleGridInstructions
             // 
@@ -210,7 +210,7 @@
             this.buttonDrawPuzzleGrid.TabIndex = 4;
             this.buttonDrawPuzzleGrid.Text = "Create puzzle grid";
             this.buttonDrawPuzzleGrid.UseVisualStyleBackColor = true;
-            this.buttonDrawPuzzleGrid.Click += new System.EventHandler(this.buttonDrawPuzzleGrid_Click);
+            this.buttonDrawPuzzleGrid.Click += new System.EventHandler(this.ButtonDrawPuzzleGrid_Click);
             // 
             // numericUpDownRows
             // 
@@ -230,7 +230,7 @@
             0,
             0,
             0});
-            this.numericUpDownRows.ValueChanged += new System.EventHandler(this.numericUpDown_ValueChanged);
+            this.numericUpDownRows.ValueChanged += new System.EventHandler(this.NumericUpDown_ValueChanged);
             // 
             // numericUpDownColumns
             // 
@@ -250,7 +250,7 @@
             0,
             0,
             0});
-            this.numericUpDownColumns.ValueChanged += new System.EventHandler(this.numericUpDown_ValueChanged);
+            this.numericUpDownColumns.ValueChanged += new System.EventHandler(this.NumericUpDown_ValueChanged);
             // 
             // labelRows
             // 
@@ -340,7 +340,7 @@
             this.buttonAddWord.TabIndex = 1;
             this.buttonAddWord.Text = "Add";
             this.buttonAddWord.UseVisualStyleBackColor = true;
-            this.buttonAddWord.Click += new System.EventHandler(this.buttonAddWord_Click);
+            this.buttonAddWord.Click += new System.EventHandler(this.ButtonAddWord_Click);
             // 
             // textBoxWord
             // 
@@ -365,7 +365,7 @@
             this.buttonSolve.TabIndex = 2;
             this.buttonSolve.Text = "Solve puzzle";
             this.buttonSolve.UseVisualStyleBackColor = true;
-            this.buttonSolve.Click += new System.EventHandler(this.buttonSolve_Click);
+            this.buttonSolve.Click += new System.EventHandler(this.ButtonSolve_Click);
             // 
             // menuStrip
             // 
@@ -393,14 +393,14 @@
             this.loadPuzzleToolStripMenuItem.Name = "loadPuzzleToolStripMenuItem";
             this.loadPuzzleToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
             this.loadPuzzleToolStripMenuItem.Text = "Load puzzle";
-            this.loadPuzzleToolStripMenuItem.Click += new System.EventHandler(this.loadPuzzleToolStripMenuItem_Click);
+            this.loadPuzzleToolStripMenuItem.Click += new System.EventHandler(this.LoadPuzzleToolStripMenuItem_Click);
             // 
             // savePuzzleToolStripMenuItem
             // 
             this.savePuzzleToolStripMenuItem.Name = "savePuzzleToolStripMenuItem";
             this.savePuzzleToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
             this.savePuzzleToolStripMenuItem.Text = "Save puzzle";
-            this.savePuzzleToolStripMenuItem.Click += new System.EventHandler(this.savePuzzleToolStripMenuItem_Click);
+            this.savePuzzleToolStripMenuItem.Click += new System.EventHandler(this.SavePuzzleToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
@@ -408,7 +408,7 @@
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.exitToolStripMenuItem.Text = "Exit";
-            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
             // 
             // FormFrameworkSolver
             // 

@@ -4,29 +4,31 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using Newtonsoft.Json;
 
 namespace FrameworkPuzzleSolver
 {
     public partial class FormFrameworkSolver : Form
     {
-        private bool disposed;
-        private List<string> words;
-        private int columns;
-        private int rows;
-        private char[][] puzzleGrid;
-        private bool dimensionsChanged;
-        bool solving;
-        bool puzzleLoad;
-        bool puzzleLoaded;
+        private bool _disposed;
+        private List<string> _words;
+        private int _columns;
+        private int _rows;
+        private char[][] _puzzleGrid;
+        private bool _dimensionsChanged;
+        bool _solving;
+        bool _puzzleLoad;
+        bool _puzzleLoaded;
 
         public FormFrameworkSolver()
         {
             InitializeComponent();
-            disposed = false;
-            words = new List<string>();
-            dimensionsChanged = true;
-            solving = false;
-            puzzleLoad = puzzleLoaded = false;
+            
+            _disposed = false;
+            _words = new List<string>();
+            _dimensionsChanged = true;
+            _solving = false;
+            _puzzleLoad = _puzzleLoaded = false;
         }
 
         /// <summary>
@@ -35,14 +37,14 @@ namespace FrameworkPuzzleSolver
         /// <param name="disposing">True if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing)
             {
-                components.Dispose();
+                components?.Dispose();
             }
-            if (!disposed)
+            if (!_disposed)
             {
-                disposed = true;
-                words.Clear();
+                _disposed = true;
+                _words.Clear();
             }
             base.Dispose(disposing);
         }
@@ -50,37 +52,41 @@ namespace FrameworkPuzzleSolver
         /// <summary>
         /// Take note when any dimension is changed.
         /// </summary>
-        private void numericUpDown_ValueChanged(object sender, EventArgs e)
+        private void NumericUpDown_ValueChanged(object sender, EventArgs e)
         {
-            dimensionsChanged = true;
+            _dimensionsChanged = true;
         }
 
         /// <summary>
         /// Draw puzzle grid with the given dimensions.
         /// </summary>
-        private void buttonDrawPuzzleGrid_Click(object sender, EventArgs e)
+        private void ButtonDrawPuzzleGrid_Click(object sender, EventArgs e)
         {
-            if (!dimensionsChanged) return;
+            if (!_dimensionsChanged) return;
+            
             Cursor = Cursors.WaitCursor;
+            
             GetPuzzleGridDimensions();
             DrawPuzzleGrid();
+            
             Cursor = Cursors.Default;
+            
             groupBoxWords.Enabled = groupBoxPuzzleGrid.Enabled = buttonSolve.Enabled = true;
             textBoxWord.Focus();
 
-            if (puzzleLoad)
+            if (_puzzleLoad)
             {
                 CopyCharArray2TableLayoutPanel();
                 System.Media.SystemSounds.Beep.Play();
-                puzzleLoad = false;
-                puzzleLoaded = true;
+                _puzzleLoad = false;
+                _puzzleLoaded = true;
             }
         }
 
         private void GetPuzzleGridDimensions()
         {
-            columns = (int)numericUpDownColumns.Value;
-            rows = (int)numericUpDownRows.Value;
+            _columns = (int)numericUpDownColumns.Value;
+            _rows = (int)numericUpDownRows.Value;
         }
 
         /// <summary>
@@ -88,24 +94,25 @@ namespace FrameworkPuzzleSolver
         /// </summary>
         private void DrawPuzzleGrid()
         {
-            if (!dimensionsChanged) return;
+            if (!_dimensionsChanged) return;
+            
             tableLayoutPanelPuzzleGrid.Visible = false;
             tableLayoutPanelPuzzleGrid.SuspendLayout();
             tableLayoutPanelPuzzleGrid.Controls.Clear();
-            tableLayoutPanelPuzzleGrid.ColumnCount = columns;
-            float percentage = 100F / columns;
+            tableLayoutPanelPuzzleGrid.ColumnCount = _columns;
+            float percentage = 100F / _columns;
             tableLayoutPanelPuzzleGrid.ColumnStyles.Clear();
-            for (int c = 0; c < columns; ++c)
+            for (int c = 0; c < _columns; ++c)
                 tableLayoutPanelPuzzleGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, percentage));
-            tableLayoutPanelPuzzleGrid.RowCount = rows;
-            percentage = 100F / rows;
+            tableLayoutPanelPuzzleGrid.RowCount = _rows;
+            percentage = 100F / _rows;
             tableLayoutPanelPuzzleGrid.RowStyles.Clear();
-            for (int r = 0; r < rows; ++r)
+            for (int r = 0; r < _rows; ++r)
                 tableLayoutPanelPuzzleGrid.RowStyles.Add(new RowStyle(SizeType.Percent, percentage));
             DrawLabels();
             tableLayoutPanelPuzzleGrid.ResumeLayout();
             tableLayoutPanelPuzzleGrid.Visible = true;
-            dimensionsChanged = false;
+            _dimensionsChanged = false;
         }
 
         /// <summary>
@@ -114,28 +121,30 @@ namespace FrameworkPuzzleSolver
         private void DrawLabels()
         {
             int currentTabIndex = 10;
-            Font font = new Font("Verdana", GetFontSize(), FontStyle.Regular, GraphicsUnit.Point, 0);
-            Point point = new Point(1, 1);
-            Padding padding = new Padding(0);
-            Size size = new Size(10, 10);
-            Label label;
-            for (int c = 0; c < columns; ++c)
+            var font = new Font("Verdana", GetFontSize(), FontStyle.Regular, GraphicsUnit.Point, 0);
+            var point = new Point(1, 1);
+            var padding = new Padding(0);
+            var size = new Size(10, 10);
+            for (int c = 0; c < _columns; ++c)
             {
-                for (int r = 0; r < rows; ++r)
+                for (int r = 0; r < _rows; ++r)
                 {
-                    label = new Label();
-                    label.AutoSize = true;
-                    label.BackColor = SystemColors.ControlLightLight;
-                    label.Dock = DockStyle.Fill;
-                    label.Font = font;
-                    label.Location = point;
-                    label.Margin = padding;
-                    label.Name = string.Format("label_{0:00}_{1:00}", c, r);
-                    label.Size = size;
-                    label.TabIndex = currentTabIndex++;
-                    label.Text = string.Empty;
-                    label.TextAlign = ContentAlignment.MiddleCenter;
-                    label.MouseClick += new MouseEventHandler(this.label_MouseClick);
+                    var label = new Label
+                    {
+                        AutoSize = true,
+                        BackColor = SystemColors.ControlLightLight,
+                        Dock = DockStyle.Fill,
+                        Font = font,
+                        Location = point,
+                        Margin = padding,
+                        Name = $"label_{c:00}_{r:00}",
+                        Size = size,
+                        TabIndex = currentTabIndex++,
+                        Text = string.Empty,
+                        TextAlign = ContentAlignment.MiddleCenter
+                    };
+                    
+                    label.MouseClick += new MouseEventHandler(Label_MouseClick);
                     tableLayoutPanelPuzzleGrid.Controls.Add(label, c, r);
                 }
             }
@@ -144,20 +153,21 @@ namespace FrameworkPuzzleSolver
         /// <summary>
         /// Adds a new word to the list of words.
         /// </summary>
-        private void buttonAddWord_Click(object sender, EventArgs e)
+        private void ButtonAddWord_Click(object sender, EventArgs e)
         {
             string word = textBoxWord
                 .Text
                 .Trim()
                 .ToUpperInvariant();
-            if (!words.Contains(word))
+            
+            if (!_words.Contains(word))
             {
-                words.Add(word);
-                words = words
+                _words.Add(word);
+                _words = _words
                     .OrderBy(w => w.Length)
                     .ThenBy(w => w)
                     .ToList();
-                SetDataSource(words);
+                SetDataSource(_words);
             }
             else
             {
@@ -182,23 +192,22 @@ namespace FrameworkPuzzleSolver
         /// <summary>
         /// Solve the puzzle.
         /// </summary>
-        private void buttonSolve_Click(object sender, EventArgs e)
+        private void ButtonSolve_Click(object sender, EventArgs e)
         {
-            solving = true;
+            _solving = true;
             groupBoxDimensions.Enabled = textBoxWord.Enabled = buttonAddWord.Enabled = buttonSolve.Enabled = false;
 
-            if (!puzzleLoaded)
+            if (!_puzzleLoaded)
             {
-                puzzleGrid = new char[columns][];
+                _puzzleGrid = new char[_columns][];
                 CopyTableLayoutPanel2CharArray();
             }
 
             // Solve the puzzle
             groupBoxPuzzleGrid.Cursor = Cursors.WaitCursor;
-            FrameworkSolver frameworkSolver = new FrameworkSolver(puzzleGrid, words);
-            puzzleGrid = frameworkSolver.SolvePuzzle();
-            if (puzzleGrid == null) return;
-            frameworkSolver = null;
+            var frameworkSolver = new FrameworkSolver(_puzzleGrid, _words);
+            _puzzleGrid = frameworkSolver.SolvePuzzle();
+            if (_puzzleGrid == null) return;
             groupBoxPuzzleGrid.Cursor = Cursors.Default;
 
             CopyCharArray2TableLayoutPanel();
@@ -210,13 +219,13 @@ namespace FrameworkPuzzleSolver
         private void CopyTableLayoutPanel2CharArray()
         {
             Cursor = Cursors.WaitCursor;
-            for (int column = 0; column < columns; ++column)
+            for (int column = 0; column < _columns; ++column)
             {
-                puzzleGrid[column] = new char[rows];
-                for (int row = 0; row < rows; ++row)
+                _puzzleGrid[column] = new char[_rows];
+                for (int row = 0; row < _rows; ++row)
                 {
-                    Label label = tableLayoutPanelPuzzleGrid.GetControlFromPosition(column, row) as Label;
-                    puzzleGrid[column][row] = IsLetter(label) ? FrameworkSolver.SPACE : FrameworkSolver.BLOCK;
+                    var label = tableLayoutPanelPuzzleGrid.GetControlFromPosition(column, row) as Label;
+                    _puzzleGrid[column][row] = IsLetter(label) ? FrameworkSolver.SPACE : FrameworkSolver.BLOCK;
                 }
             }
             Cursor = Cursors.Default;
@@ -228,15 +237,19 @@ namespace FrameworkPuzzleSolver
         private void CopyCharArray2TableLayoutPanel()
         {
             Cursor = Cursors.WaitCursor;
-            for (int column = 0; column < columns; ++column)
+            for (int column = 0; column < _columns; ++column)
             {
-                for (int row = 0; row < rows; ++row)
+                for (int row = 0; row < _rows; ++row)
                 {
-                    Label label = tableLayoutPanelPuzzleGrid.GetControlFromPosition(column, row) as Label;
-                    char ch = puzzleGrid[column][row];
+                    if (!(tableLayoutPanelPuzzleGrid.GetControlFromPosition(column, row) is Label label))
+                    {
+                        throw new Exception("Label is null.");
+                    }
+
+                    char ch = _puzzleGrid[column][row];
                     if (ch != FrameworkSolver.BLOCK)
                         label.Text = new string(ch, 1);
-                    else if (!solving)
+                    else if (!_solving)
                         ToggleCellStatus(label);
                 }
             }
@@ -256,9 +269,9 @@ namespace FrameworkPuzzleSolver
         /// <summary>
         /// Capture mouse right click events.
         /// </summary>
-        private void label_MouseClick(object sender, MouseEventArgs e)
+        private void Label_MouseClick(object sender, MouseEventArgs e)
         {
-            if (!solving && e.Button == MouseButtons.Right && e.Clicks == 1)
+            if (!_solving && e.Button == MouseButtons.Right && e.Clicks == 1)
                 ToggleCellStatus((Label)sender);
         }
 
@@ -285,7 +298,7 @@ namespace FrameworkPuzzleSolver
         /// <returns>Font size.</returns>
         private float GetFontSize()
         {
-            return (tableLayoutPanelPuzzleGrid.Size.Height / rows) * 0.5f;
+            return (float)tableLayoutPanelPuzzleGrid.Size.Height / _rows * 0.5f;
         }
 
         /// <summary>
@@ -297,9 +310,9 @@ namespace FrameworkPuzzleSolver
             textBoxWord.Focus();
         }
 
-        private void loadPuzzleToolStripMenuItem_Click(object sender, EventArgs e)
+        private void LoadPuzzleToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenFileDialog open = new OpenFileDialog()
+            using var open = new OpenFileDialog
             {
                 AddExtension = true,
                 CheckFileExists = true,
@@ -313,32 +326,31 @@ namespace FrameworkPuzzleSolver
                 ShowReadOnly = false,
                 Title = "Select Framework puzzle file"
             };
-            DialogResult result = open.ShowDialog(this);
-            if (result == DialogResult.OK)
+            
+            var result = open.ShowDialog(this);
+            if (result != DialogResult.OK) return;
+            
+            if (!File.Exists(open.FileName))
             {
-                if (!File.Exists(open.FileName))
-                {
-                    System.Media.SystemSounds.Beep.Play();
-                    MessageBox.Show("File does not exist!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                string json = File.ReadAllText(open.FileName);
-                Tuple<char[][], List<string>> tuple = Newtonsoft.Json.JsonConvert.DeserializeObject<Tuple<char[][], List<string>>>(json);
-                puzzleGrid = tuple.Item1;
-                numericUpDownColumns.Value = puzzleGrid.Length;
-                numericUpDownRows.Value = puzzleGrid[0].Length;
-                words = tuple.Item2;
-                SetDataSource(words);
-                puzzleLoad = true;
-                buttonDrawPuzzleGrid.PerformClick();
+                System.Media.SystemSounds.Beep.Play();
+                MessageBox.Show("File does not exist!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
-            open.Dispose();
+
+            string json = File.ReadAllText(open.FileName);
+            (_puzzleGrid, _words) = JsonConvert.DeserializeObject<Tuple<char[][], List<string>>>(json);
+            numericUpDownColumns.Value = _puzzleGrid.Length;
+            numericUpDownRows.Value = _puzzleGrid[0].Length;
+                
+            SetDataSource(_words);
+                
+            _puzzleLoad = true;
+            buttonDrawPuzzleGrid.PerformClick();
         }
 
-        private void savePuzzleToolStripMenuItem_Click(object sender, EventArgs e)
+        private void SavePuzzleToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SaveFileDialog save = new SaveFileDialog()
+            using var save = new SaveFileDialog
             {
                 AddExtension = true,
                 DefaultExt = "puz",
@@ -347,23 +359,22 @@ namespace FrameworkPuzzleSolver
                 InitialDirectory = AppDomain.CurrentDomain.BaseDirectory,
                 OverwritePrompt = true,
                 RestoreDirectory = true,
-                Title = "Save Frameword puzzle"
+                Title = "Save Framework puzzle"
             };
-            DialogResult result = save.ShowDialog(this);
+            var result = save.ShowDialog(this);
             if (result == DialogResult.OK)
             {
                 GetPuzzleGridDimensions();
-                puzzleGrid = new char[columns][];
+                _puzzleGrid = new char[_columns][];
                 CopyTableLayoutPanel2CharArray();
-                Tuple<char[][], List<string>> tuple = new Tuple<char[][], List<string>>(puzzleGrid, words);
-                string json = Newtonsoft.Json.JsonConvert.SerializeObject(tuple);
+                var tuple = new Tuple<char[][], List<string>>(_puzzleGrid, _words);
+                string json = JsonConvert.SerializeObject(tuple);
                 File.WriteAllText(save.FileName, json);
                 System.Media.SystemSounds.Beep.Play();
             }
-            save.Dispose();
         }
 
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Close();
         }

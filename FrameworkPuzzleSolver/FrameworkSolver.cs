@@ -11,17 +11,17 @@ namespace FrameworkPuzzleSolver
         public const char SPACE = ' ';
         public const char BLOCK = '#';
 
-        private char[][] puzzleGrid;
-        private List<string> words;
+        private readonly char[][] _puzzleGrid;
+        private readonly List<string> _words;
 
-        private Dictionary<int, List<string>> lengthGroups;
-        private List<WordSpace> wordSpaces;
-        private List<Intersection> intersections;
+        private Dictionary<int, List<string>> _lengthGroups;
+        private List<WordSpace> _wordSpaces;
+        private List<Intersection> _intersections;
 
         public FrameworkSolver(char[][] puzzleGrid, List<string> words)
         {
-            this.puzzleGrid = puzzleGrid;
-            this.words = words;
+            _puzzleGrid = puzzleGrid;
+            _words = words;
 
             if (puzzleGrid == null || words == null)
                 throw new Exception("Solve parameters may not be null.");
@@ -38,9 +38,9 @@ namespace FrameworkPuzzleSolver
             GenerateDownWordSpaces();
 
             // Are there as many word spaces as there are given words?
-            if (words.Count != wordSpaces.Count)
+            if (_words.Count != _wordSpaces.Count)
             {
-                System.Windows.Forms.MessageBox.Show("The number of given words is different than the number of word spaces found in the grid!", "Error", 
+                System.Windows.Forms.MessageBox.Show("The number of given words is different than the number of word spaces found in the grid!", "Error",
                     System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
                 return null;
             }
@@ -48,7 +48,7 @@ namespace FrameworkPuzzleSolver
             GenerateWordIntersections();
             IntersectionIterations();
 
-            return puzzleGrid;
+            return _puzzleGrid;
         }
 
         /// <summary>
@@ -56,18 +56,19 @@ namespace FrameworkPuzzleSolver
         /// </summary>
         private void GroupByWordLength()
         {
-            lengthGroups = new Dictionary<int, List<string>>();
-            int minLength = words
+            _lengthGroups = new Dictionary<int, List<string>>();
+            int minLength = _words
                 .Min(w => w.Length);
-            int maxLength = words
+            int maxLength = _words
                 .Max(w => w.Length);
             for (int length = minLength; length <= maxLength; ++length)
             {
-                List<string> wordsLength = words
+                var wordsLength = _words
                     .Where(w => w.Length == length)
                     .OrderBy(w => w)
                     .ToList();
-                lengthGroups.Add(length, wordsLength);
+
+                _lengthGroups.Add(length, wordsLength);
             }
         }
 
@@ -76,44 +77,47 @@ namespace FrameworkPuzzleSolver
         /// </summary>
         private void GenerateAcrossWordSpaces()
         {
-            wordSpaces = new List<WordSpace>();
-            int startColumn;
-            int endColumn;
+            _wordSpaces = new List<WordSpace>();
 
-            for (int row = 0; row < puzzleGrid[0].Length; ++row)
+            for (int row = 0; row < _puzzleGrid[0].Length; ++row)
             {
-                startColumn = endColumn = 0;
+                int endColumn;
+                var startColumn = endColumn = 0;
                 do
                 {
-                    if (puzzleGrid[endColumn][row] != BLOCK)
+                    if (_puzzleGrid[endColumn][row] != BLOCK)
                     {
                         // Read word space.
-                        while (endColumn < puzzleGrid.Length && puzzleGrid[endColumn][row] != BLOCK)
+                        while (endColumn < _puzzleGrid.Length && _puzzleGrid[endColumn][row] != BLOCK)
                             ++endColumn;
+
                         int length = endColumn - startColumn;
-                        if (lengthGroups.ContainsKey(length))
+
+                        if (!_lengthGroups.ContainsKey(length)) continue;
+
+                        // We have an across word space.
+                        var word = new WordSpace()
                         {
-                            // We have an across word space.
-                            WordSpace word = new WordSpace()
-                            {
-                                Direction = Direction.Across,
-                                EndPoint = new Cell(endColumn - 1, row),
-                                Filled = false,
-                                Length = length,
-                                PossibleWords = lengthGroups.ContainsKey(length) ? new List<string>(lengthGroups[length]) : new List<string>(),
-                                StartPoint = new Cell(startColumn, row)
-                            };
-                            wordSpaces.Add(word);
-                        }
+                            Direction = Direction.Across,
+                            EndPoint = new Cell(endColumn - 1, row),
+                            Filled = false,
+                            Length = length,
+                            PossibleWords = _lengthGroups.ContainsKey(length)
+                                ? new List<string>(_lengthGroups[length])
+                                : new List<string>(),
+                            StartPoint = new Cell(startColumn, row)
+                        };
+                        _wordSpaces.Add(word);
                     }
                     else
                     {
                         // Skip over block sequence.
-                        while (endColumn < puzzleGrid.Length && puzzleGrid[endColumn][row] == BLOCK)
+                        while (endColumn < _puzzleGrid.Length && _puzzleGrid[endColumn][row] == BLOCK)
                             ++endColumn;
+
                         startColumn = endColumn;
                     }
-                } while (endColumn < puzzleGrid.Length);
+                } while (endColumn < _puzzleGrid.Length);
             }
         }
 
@@ -122,43 +126,45 @@ namespace FrameworkPuzzleSolver
         /// </summary>
         private void GenerateDownWordSpaces()
         {
-            int startRow;
-            int endRow;
-
-            for (int column = 0; column < puzzleGrid.Length; ++column)
+            for (int column = 0; column < _puzzleGrid.Length; ++column)
             {
-                startRow = endRow = 0;
+                int endRow;
+                var startRow = endRow = 0;
                 do
                 {
-                    if (puzzleGrid[column][endRow] == SPACE)
+                    if (_puzzleGrid[column][endRow] == SPACE)
                     {
                         // Read word space.
-                        while (endRow < puzzleGrid[0].Length && puzzleGrid[column][endRow] != BLOCK)
+                        while (endRow < _puzzleGrid[0].Length && _puzzleGrid[column][endRow] != BLOCK)
                             ++endRow;
+
                         int length = endRow - startRow;
-                        if (lengthGroups.ContainsKey(length))
+
+                        if (!_lengthGroups.ContainsKey(length)) continue;
+
+                        // We have an across word space.
+                        var wordSpace = new WordSpace()
                         {
-                            // We have an across word space.
-                            WordSpace wordSpace = new WordSpace()
-                            {
-                                Direction = Direction.Down,
-                                EndPoint = new Cell(column, endRow - 1),
-                                Filled = false,
-                                Length = length,
-                                PossibleWords = lengthGroups.ContainsKey(length) ? new List<string>(lengthGroups[length]) : new List<string>(),
-                                StartPoint = new Cell(column, startRow)
-                            };
-                            wordSpaces.Add(wordSpace);
-                        }
+                            Direction = Direction.Down,
+                            EndPoint = new Cell(column, endRow - 1),
+                            Filled = false,
+                            Length = length,
+                            PossibleWords = _lengthGroups.ContainsKey(length)
+                                ? new List<string>(_lengthGroups[length])
+                                : new List<string>(),
+                            StartPoint = new Cell(column, startRow)
+                        };
+                        _wordSpaces.Add(wordSpace);
                     }
                     else // (puzzleGrid[column][endRow] == BLOCK)
                     {
                         // Skip over block sequence.
-                        while (endRow < puzzleGrid[0].Length && puzzleGrid[column][endRow] == BLOCK)
+                        while (endRow < _puzzleGrid[0].Length && _puzzleGrid[column][endRow] == BLOCK)
                             ++endRow;
+
                         startRow = endRow;
                     }
-                } while (endRow < puzzleGrid[0].Length);
+                } while (endRow < _puzzleGrid[0].Length);
             }
         }
 
@@ -168,12 +174,13 @@ namespace FrameworkPuzzleSolver
         private void GenerateWordIntersections()
         {
             // Generate list of intersections.
-            intersections = new List<Intersection>();
-            foreach (WordSpace wordspace in wordSpaces)
+            _intersections = new List<Intersection>();
+
+            foreach (var wordspace in _wordSpaces)
             {
                 if (wordspace.Direction == Direction.Across)
                 {
-                    List<Intersection> i = wordSpaces
+                    var i = _wordSpaces
                         .Where(ws => ws.Direction == Direction.Down)
                         .Where(ws => ws.StartPoint.Row <= wordspace.StartPoint.Row && wordspace.StartPoint.Row <= ws.EndPoint.Row)
                         .Where(ws => wordspace.StartPoint.Column <= ws.StartPoint.Column && ws.StartPoint.Column <= wordspace.EndPoint.Column)
@@ -185,11 +192,11 @@ namespace FrameworkPuzzleSolver
                             Row = wordspace.StartPoint.Row
                         })
                         .ToList();
-                    intersections.AddRange(i);
+                    _intersections.AddRange(i);
                 }
                 else // (wordspace.Direction == Direction.Down)
                 {
-                    List<Intersection> i = wordSpaces
+                    var i = _wordSpaces
                         .Where(ws => ws.Direction == Direction.Across)
                         .Where(ws => ws.StartPoint.Column <= wordspace.StartPoint.Column && wordspace.StartPoint.Column <= ws.EndPoint.Column)
                         .Where(ws => wordspace.StartPoint.Row <= ws.StartPoint.Row && ws.StartPoint.Row <= wordspace.EndPoint.Row)
@@ -201,7 +208,7 @@ namespace FrameworkPuzzleSolver
                             Row = ws.StartPoint.Row
                         })
                         .ToList();
-                    intersections.AddRange(i);
+                    _intersections.AddRange(i);
                 }
             }
         }
@@ -211,8 +218,8 @@ namespace FrameworkPuzzleSolver
         /// </summary>
         private void IntersectionIterations()
         {
-            int sanity = 0,
-                sanityLimit = 100;
+            int sanity = 0;
+            const int SANITY_LIMIT = 100;
 
             do
             {
@@ -220,9 +227,9 @@ namespace FrameworkPuzzleSolver
                 SearchForSingleRemainingWords();
 
                 ++sanity;
-            } while (sanity < sanityLimit && !AreWeDone());
+            } while (sanity < SANITY_LIMIT && !AreWeDone());
 
-            if (sanity == sanityLimit)
+            if (sanity == SANITY_LIMIT)
                 throw new OverflowException("Intersection iterations surpassed " + sanity + " iterations!");
         }
 
@@ -233,16 +240,17 @@ namespace FrameworkPuzzleSolver
         private void AnalyzeIntersections()
         {
             // Process each intersection that still has unfilled word spaces.
-            IEnumerable<Intersection> unfilledIntersections = intersections
+            var unfilledIntersections = _intersections
                 .Where(i => !i.WordAcross.Filled || !i.WordDown.Filled);
-            foreach (Intersection intersection in unfilledIntersections)
+
+            foreach (var intersection in unfilledIntersections)
             {
                 int wordAcrossNdx = intersection.Column - intersection.WordAcross.StartPoint.Column;
                 int wordDownNdx = intersection.Row - intersection.WordDown.StartPoint.Row;
 
                 if (!intersection.WordAcross.Filled)
                 {
-                    // Reduce across word space possibilites.
+                    // Reduce across word space possibilities.
                     var join = intersection.WordAcross.PossibleWords
                         .Join(intersection.WordDown.PossibleWords,
                               wa => wa[wordAcrossNdx],
@@ -261,7 +269,7 @@ namespace FrameworkPuzzleSolver
 
                 if (!intersection.WordDown.Filled)
                 {
-                    // Reduce down word space possibilites.
+                    // Reduce down word space possibilities.
                     var join = intersection.WordDown.PossibleWords
                         .Join(intersection.WordAcross.PossibleWords,
                                 wd => wd[wordDownNdx],
@@ -286,16 +294,17 @@ namespace FrameworkPuzzleSolver
         /// </summary>
         private void SearchForSingleRemainingWords()
         {
-            IEnumerable<WordSpace> singleWordSpaces = null;
+            IEnumerable<WordSpace> singleWordSpaces;
             do
             {
                 // Generate the list of word spaces that have one possible remaining word.
-                singleWordSpaces = wordSpaces
+                singleWordSpaces = _wordSpaces
                     .Where(ws => !ws.Filled)
-                    .Where(ws => ws.PossibleWords.Count == 1);
+                    .Where(ws => ws.PossibleWords.Count == 1)
+                    .ToList();
 
                 // Process each resulting word space.
-                foreach (WordSpace wordspace in singleWordSpaces)
+                foreach (var wordspace in singleWordSpaces)
                 {
                     // Copy the remaining word to the puzzle grid.
                     string word = wordspace.PossibleWords
@@ -304,20 +313,20 @@ namespace FrameworkPuzzleSolver
                     if (wordspace.Direction == Direction.Across)
                     {
                         for (int ndx = 0; ndx < word.Length; ++ndx)
-                            puzzleGrid[wordspace.StartPoint.Column + ndx][wordspace.StartPoint.Row] = word[ndx];
+                            _puzzleGrid[wordspace.StartPoint.Column + ndx][wordspace.StartPoint.Row] = word[ndx];
                     }
                     else // wordspace.Direction == Direction.Down
                     {
                         for (int ndx = 0; ndx < word.Length; ++ndx)
-                            puzzleGrid[wordspace.StartPoint.Column][wordspace.StartPoint.Row + ndx] = word[ndx];
+                            _puzzleGrid[wordspace.StartPoint.Column][wordspace.StartPoint.Row + ndx] = word[ndx];
                     }
                     wordspace.Filled = true;
 
                     // Remove word from all other, unfilled word spaces.
-                    var otherUnfilledWordSpaces = wordSpaces
+                    var otherUnfilledWordSpaces = _wordSpaces
                         .Where(ws => !ws.Filled)
                         .Where(ws => ws != wordspace);
-                    foreach (WordSpace ws in otherUnfilledWordSpaces)
+                    foreach (var ws in otherUnfilledWordSpaces)
                     {
                         ws.PossibleWords
                             .Remove(word);
@@ -325,12 +334,12 @@ namespace FrameworkPuzzleSolver
                         if (ws.Length == 0) InvalidOperation(ws, "SearchForSingleRemainingWords");
                     }
                 }
-            } while (singleWordSpaces.Count() > 0);
+            } while (singleWordSpaces.Any());
         }
 
         private bool AreWeDone()
         {
-            return wordSpaces
+            return _wordSpaces
                 .All(ws => ws.Filled);
         }
 
@@ -360,10 +369,10 @@ namespace FrameworkPuzzleSolver
         public WordSpace WordDown { get; set; }
     }
 
-    public struct Cell
+    public readonly struct Cell
     {
-        public int Column { get; set; }
-        public int Row { get; set; }
+        public int Column { get; }
+        public int Row { get; }
 
         public Cell(int column, int row)
         {
