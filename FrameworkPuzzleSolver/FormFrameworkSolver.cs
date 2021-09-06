@@ -23,7 +23,7 @@ namespace FrameworkPuzzleSolver
         public FormFrameworkSolver()
         {
             InitializeComponent();
-            
+
             _disposed = false;
             _words = new List<string>();
             _dimensionsChanged = true;
@@ -50,6 +50,16 @@ namespace FrameworkPuzzleSolver
         }
 
         /// <summary>
+        /// Determine whether the label is a letter or a block.
+        /// </summary>
+        /// <param name="label">Target label.</param>
+        /// <returns>True if the label is a letter, otherwise false.</returns>
+        private static bool IsLetter(Label label)
+        {
+            return label.BackColor == SystemColors.ControlLightLight;
+        }
+
+        /// <summary>
         /// Take note when any dimension is changed.
         /// </summary>
         private void NumericUpDown_ValueChanged(object sender, EventArgs e)
@@ -63,14 +73,14 @@ namespace FrameworkPuzzleSolver
         private void ButtonDrawPuzzleGrid_Click(object sender, EventArgs e)
         {
             if (!_dimensionsChanged) return;
-            
+
             Cursor = Cursors.WaitCursor;
-            
+
             GetPuzzleGridDimensions();
             DrawPuzzleGrid();
-            
+
             Cursor = Cursors.Default;
-            
+
             groupBoxWords.Enabled = groupBoxPuzzleGrid.Enabled = buttonSolve.Enabled = true;
             textBoxWord.Focus();
 
@@ -95,7 +105,7 @@ namespace FrameworkPuzzleSolver
         private void DrawPuzzleGrid()
         {
             if (!_dimensionsChanged) return;
-            
+
             tableLayoutPanelPuzzleGrid.Visible = false;
             tableLayoutPanelPuzzleGrid.SuspendLayout();
             tableLayoutPanelPuzzleGrid.Controls.Clear();
@@ -143,8 +153,8 @@ namespace FrameworkPuzzleSolver
                         Text = string.Empty,
                         TextAlign = ContentAlignment.MiddleCenter
                     };
-                    
-                    label.MouseClick += new MouseEventHandler(Label_MouseClick);
+
+                    label.MouseClick += Label_MouseClick;
                     tableLayoutPanelPuzzleGrid.Controls.Add(label, c, r);
                 }
             }
@@ -159,7 +169,7 @@ namespace FrameworkPuzzleSolver
                 .Text
                 .Trim()
                 .ToUpperInvariant();
-            
+
             if (!_words.Contains(word))
             {
                 _words.Add(word);
@@ -257,16 +267,6 @@ namespace FrameworkPuzzleSolver
         }
 
         /// <summary>
-        /// Determine whether the label is a letter or a block.
-        /// </summary>
-        /// <param name="label">Target label.</param>
-        /// <returns>True if the label is a letter, otherwise false.</returns>
-        private bool IsLetter(Label label)
-        {
-            return label.BackColor == SystemColors.ControlLightLight;
-        }
-
-        /// <summary>
         /// Capture mouse right click events.
         /// </summary>
         private void Label_MouseClick(object sender, MouseEventArgs e)
@@ -326,10 +326,10 @@ namespace FrameworkPuzzleSolver
                 ShowReadOnly = false,
                 Title = "Select Framework puzzle file"
             };
-            
+
             var result = open.ShowDialog(this);
             if (result != DialogResult.OK) return;
-            
+
             if (!File.Exists(open.FileName))
             {
                 System.Media.SystemSounds.Beep.Play();
@@ -341,9 +341,9 @@ namespace FrameworkPuzzleSolver
             (_puzzleGrid, _words) = JsonConvert.DeserializeObject<Tuple<char[][], List<string>>>(json);
             numericUpDownColumns.Value = _puzzleGrid.Length;
             numericUpDownRows.Value = _puzzleGrid[0].Length;
-                
+
             SetDataSource(_words);
-                
+
             _puzzleLoad = true;
             buttonDrawPuzzleGrid.PerformClick();
         }

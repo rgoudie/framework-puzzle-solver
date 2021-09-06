@@ -274,7 +274,7 @@ namespace FrameworkPuzzleSolver
                         .Join(intersection.WordAcross.PossibleWords,
                                 wd => wd[wordDownNdx],
                                 wa => wa[wordAcrossNdx],
-                                (wd, wa) => new { Wd = wd, Wa = wa })
+                                (wd, wa) => new { Wa = wa, Wd = wd })
                         .Where(a => a.Wd != a.Wa);
 
                     intersection.WordDown.PossibleWords = join
