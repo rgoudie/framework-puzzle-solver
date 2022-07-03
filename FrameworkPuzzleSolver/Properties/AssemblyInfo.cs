@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Ray Goudie")]
 [assembly: AssemblyProduct("FrameworkPuzzleSolver")]
-[assembly: AssemblyCopyright("Copyright © 2020 - Ray Goudie")]
+[assembly: AssemblyCopyright("Copyright © 2022 - Ray Goudie")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2021.09.05")]
-[assembly: AssemblyFileVersion("2021.09.05")]
+[assembly: AssemblyVersion("2022.07.03")]
+[assembly: AssemblyFileVersion("2022.07.03")]
