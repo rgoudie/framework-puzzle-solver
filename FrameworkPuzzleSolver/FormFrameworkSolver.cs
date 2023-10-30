@@ -279,7 +279,7 @@ public partial class FormFrameworkSolver : Form
     /// Toggle the status of the cell.
     /// </summary>
     /// <param name="label">Label control to toggle.</param>
-    private void ToggleCellStatus(Label label)
+    private static void ToggleCellStatus(Label label)
     {
         if (label.BackColor == SystemColors.ControlDark)
         {
@@ -312,20 +312,18 @@ public partial class FormFrameworkSolver : Form
 
     private void LoadPuzzleToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        using var open = new OpenFileDialog
-        {
-            AddExtension = true,
-            CheckFileExists = true,
-            CheckPathExists = true,
-            DefaultExt = "puz",
-            FileName = string.Empty,
-            Filter = "Puzzle files (*.puz)|*.puz|All files (*.*)|*.*",
-            InitialDirectory = AppDomain.CurrentDomain.BaseDirectory,
-            Multiselect = false,
-            RestoreDirectory = true,
-            ShowReadOnly = false,
-            Title = "Select Framework puzzle file"
-        };
+        using var open = new OpenFileDialog();
+        open.AddExtension = true;
+        open.CheckFileExists = true;
+        open.CheckPathExists = true;
+        open.DefaultExt = "puz";
+        open.FileName = string.Empty;
+        open.Filter = "Puzzle files (*.puz)|*.puz|All files (*.*)|*.*";
+        open.InitialDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        open.Multiselect = false;
+        open.RestoreDirectory = true;
+        open.ShowReadOnly = false;
+        open.Title = "Select Framework puzzle file";
 
         var result = open.ShowDialog(this);
         if (result != DialogResult.OK) return;
@@ -350,17 +348,15 @@ public partial class FormFrameworkSolver : Form
 
     private void SavePuzzleToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        using var save = new SaveFileDialog
-        {
-            AddExtension = true,
-            DefaultExt = "puz",
-            FileName = string.Empty,
-            Filter = "Puzzle files (*.puz)|*.puz|All files (*.*)|*.*",
-            InitialDirectory = AppDomain.CurrentDomain.BaseDirectory,
-            OverwritePrompt = true,
-            RestoreDirectory = true,
-            Title = "Save Framework puzzle"
-        };
+        using var save = new SaveFileDialog();
+        save.AddExtension = true;
+        save.DefaultExt = "puz";
+        save.FileName = string.Empty;
+        save.Filter = "Puzzle files (*.puz)|*.puz|All files (*.*)|*.*";
+        save.InitialDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        save.OverwritePrompt = true;
+        save.RestoreDirectory = true;
+        save.Title = "Save Framework puzzle";
         var result = save.ShowDialog(this);
         if (result == DialogResult.OK)
         {
